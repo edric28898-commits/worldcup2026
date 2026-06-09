@@ -265,9 +265,37 @@ var M = [
   ["2026-07-19T19:00Z","FIN","CHUNG KET","--","CHUNG KET","--","MetLife Stadium","New York"]
 ];
 
-// Scores: add manually or leave empty
-// Format: { "2026-06-11T19:00Z": [1, 2] }
 var SCORES = {};
+
+function rebuildCard(iso, sc) {
+  var card = document.querySelector('.match-card[data-iso="' + iso + '"]');
+  if (!card) return;
+  var scoreMid = card.querySelector(".score-mid");
+  if (!scoreMid) return;
+  if (sc[0] !== null && sc[1] !== null) {
+    scoreMid.innerHTML = '<span class="sc">'+sc[0]+'</span><span class="sc-sep">:</span><span class="sc">'+sc[1]+'</span>';
+  }
+}
+
+function fetchScores() {
+  fetch("/.netlify/functions/scores")
+    .then(function(res) { return res.json(); })
+    .then(function(matches) {
+      var updated = [];
+      matches.forEach(function(m) {
+        if (m.status !== "IN_PLAY" && m.status !== "FINISHED") return;
+        if (m.homeScore === null && m.awayScore === null) return;
+        var key = m.utcDate;
+        SCORES[key] = [m.homeScore, m.awayScore];
+        updated.push(key);
+      });
+      updated.forEach(function(iso) { rebuildCard(iso, SCORES[iso]); });
+    })
+    .catch(function() {});
+}
+
+fetchScores();
+setInterval(fetchScores, 60000);
 
 var FLAG_BASE = "https://flagcdn.com/24x18/";
 
