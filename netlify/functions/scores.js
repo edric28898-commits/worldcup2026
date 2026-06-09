@@ -24,13 +24,15 @@ exports.handler = async function () {
       utcDate: m.utcDate,
       homeTeam: m.homeTeam.name,
       awayTeam: m.awayTeam.name,
-      score: m.score,
+      homeScore: m.score.fullTime.home,
+      awayScore: m.score.fullTime.away,
+      status: m.status,
     }));
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ matches }),
+      body: JSON.stringify(matches),
     };
   } catch (err) {
     return {
